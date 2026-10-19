@@ -66,7 +66,7 @@
                 </div>
                 
                 @if($event->description)
-                <div class="prose prose-gray dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
+                <div class="prose prose-gray dark:prose-invert max-w-none text-gray-800 dark:text-gray-200">
                     {!! $event->description !!}
                 </div>
                 @endif

@@ -1,198 +1,222 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $event->name ?? 'Event Landing Page' }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script>
-        // Initialize theme before Alpine loads to prevent flash
-        (function() {
-            const savedTheme = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const isDark = savedTheme ? savedTheme === 'dark' : prefersDark;
-            document.documentElement.classList.toggle('dark', isDark);
-        })();
-    </script>
-</head>
-<body class="bg-gray-50 dark:bg-gray-900 min-h-screen" x-data="{ ...taskApp(), ...themeApp() }" x-init="init()">
-    <div class="max-w-4xl mx-auto px-4 py-12">
-        {{-- Theme Toggle --}}
-        <div class="mb-6 flex justify-end">
-            <button
-                @click="toggleTheme()"
-                :aria-label="isDark ? 'Schakel naar lichte modus' : 'Schakel naar donkere modus'"
-                class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-                <template x-if="!isDark">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-                    </svg>
-                </template>
-                <template x-if="isDark">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                    </svg>
-                </template>
-            </button>
-        </div>
+<x-layouts.app :title="$event->name ?? 'Halloweentocht Griezels in Mere'">
+    {{-- Custom styles for this page --}}
+    @push('styles')
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .font-halloween {
+            font-family: 'Creepster', cursive;
+            letter-spacing: 1px;
+        }
+    </style>
+    @endpush
 
+    {{-- Main Content --}}
+    <main class="bg-gray-50 dark:bg-[#080914] text-gray-900 dark:text-slate-200 antialiased min-h-screen" x-data="{ openModal: false }">
+        
         {{-- Event Section --}}
         @if($event)
-        <section class="mb-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-            @if($event->image)
-            <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->name }}" class="w-full h-64 object-cover">
-            @endif
-            <div class="p-8">
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">{{ $event->name }}</h1>
-                
-                <div class="flex flex-wrap gap-6 text-gray-600 dark:text-gray-300 mb-6">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        <span>{{ $event->date->format('d F Y') }} @if($event->time) om {{ $event->time->format('H:i') }} @endif</span>
+        <section class="max-w-7xl mx-auto px-6 py-12">
+            <div class="bg-white dark:bg-[#0d0e21]/90 border border-gray-200 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-xl relative">
+                @if($event->image)
+                <div class="relative aspect-[16/9] overflow-hidden">
+                    <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->name }}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent dark:from-black/80"></div>
+                </div>
+                @endif
+                <div class="p-6 sm:p-8 space-y-6">
+                    <div class="inline-flex items-center gap-2 bg-orange-100 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/40 px-3.5 py-1.5 rounded-full text-xs font-medium text-orange-700 dark:text-orange-400">
+                        <span>🎃</span>
+                        <span>Halloween Event</span>
                     </div>
-                    @if($event->location)
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    
+                    <h1 class="font-halloween text-3xl sm:text-4xl lg:text-5xl text-orange-600 dark:text-orange-500 leading-tight uppercase tracking-wide">
+                        {{ $event->name }}
+                    </h1>
+
+                    <div class="w-28 h-1 text-orange-500">
+                        <svg viewBox="0 0 100 20" preserveAspectRatio="none" class="w-full h-full fill-none stroke-current stroke-[4]">
+                            <path d="M0 10 Q25 0 50 10 T100 10" />
                         </svg>
-                        <span>{{ $event->location }}</span>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 text-sm text-gray-700 dark:text-slate-300">
+                        <div class="flex items-center gap-2 bg-gray-100 dark:bg-slate-900/80 border border-gray-200 dark:border-slate-800 px-3.5 py-1.5 rounded-lg">
+                            <span class="text-orange-500 dark:text-orange-400">📅</span>
+                            <span>{{ $event->date->format('d F Y') }} @if($event->time) om {{ $event->time->format('H:i') }} @endif</span>
+                        </div>
+                        @if($event->location)
+                        <div class="flex items-center gap-2 bg-gray-100 dark:bg-slate-900/80 border border-gray-200 dark:border-slate-800 px-3.5 py-1.5 rounded-lg">
+                            <span class="text-orange-500 dark:text-orange-400">📍</span>
+                            <span>{{ $event->location }}</span>
+                        </div>
+                        @endif
+                    </div>
+                    
+                    @if($event->description)
+                    <div class="text-gray-700 dark:text-slate-300 text-base leading-relaxed prose dark:prose-invert max-w-none">
+                        {!! $event->description !!}
                     </div>
                     @endif
                 </div>
-                
-                @if($event->description)
-                <div class="prose prose-gray dark:prose-invert max-w-none text-gray-800 dark:text-gray-200">
-                    {!! $event->description !!}
-                </div>
-                @endif
             </div>
         </section>
         @else
-        <section class="mb-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Welkom op onze Event Pagina</h1>
-            <p class="text-gray-600 dark:text-gray-300">Er is momenteel geen event gepubliceerd.</p>
+        <section class="max-w-7xl mx-auto px-6 py-12">
+            <div class="bg-white dark:bg-[#0d0e21]/90 border border-gray-200 dark:border-slate-800/80 rounded-2xl p-8 sm:p-10 text-center space-y-6 shadow-xl">
+                <div class="inline-flex items-center gap-2 bg-orange-100 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/40 px-3.5 py-1.5 rounded-full text-xs font-medium text-orange-700 dark:text-orange-400">
+                    <span>🎃</span>
+                    <span>Geen Event</span>
+                </div>
+                
+                <h1 class="font-halloween text-3xl sm:text-4xl lg:text-5xl text-orange-600 dark:text-orange-500 leading-tight uppercase tracking-wide">
+                    Welkom op onze Event Pagina
+                </h1>
+
+                <div class="w-28 h-1 text-orange-500 mx-auto">
+                    <svg viewBox="0 0 100 20" preserveAspectRatio="none" class="w-full h-full fill-none stroke-current stroke-[4]">
+                        <path d="M0 10 Q25 0 50 10 T100 10" />
+                    </svg>
+                </div>
+
+                <p class="text-gray-700 dark:text-slate-300 text-lg leading-relaxed max-w-2xl mx-auto">
+                    Er is momenteel geen event gepubliceerd. Blijf op de hoogte voor de volgende Halloweentocht!
+                </p>
+            </div>
         </section>
         @endif
 
         {{-- Tasks CRUD Section --}}
-        <section class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Takenlijst</h2>
-                <button
-                    @click="openModal()"
-                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                    Nieuwe taak
-                </button>
-            </div>
+        <section class="max-w-7xl mx-auto px-6 pb-12" x-data="taskApp()">
+            <div class="bg-white dark:bg-[#0d0e21]/90 border border-gray-200 dark:border-slate-800/80 rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <span>📋</span>
+                        <span>Takenlijst</span>
+                    </h2>
+                    <button
+                        @click="openModal()"
+                        class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold px-6 py-2.5 rounded-full shadow-lg shadow-orange-600/30 transition-all transform hover:-translate-y-0.5 text-sm flex items-center gap-2"
+                    >
+                        <span>+</span>
+                        <span>Nieuwe taak</span>
+                    </button>
+                </div>
 
-            {{-- Task Form Modal --}}
-            <div
-                x-show="modalOpen"
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0"
-                x-transition:enter-end="opacity-100"
-                x-transition:leave="transition ease-in duration-150"
-                x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                class="fixed inset-0 z-50 overflow-y-auto"
-                @click.outside="modalOpen = false"
-            >
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="modalOpen = false"></div>
-                    <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white" x-text="editingTask ? 'Taak bewerken' : 'Nieuwe taak'"></h3>
-                            <button @click="modalOpen = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                        </div>
+                {{-- Task Form Modal --}}
+                <div
+                    x-show="modalOpen"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/80 backdrop-blur-sm"
+                    @click.outside="modalOpen = false"
+                >
+                    <div @click.away="modalOpen = false" class="bg-white dark:bg-[#0d0e21] border border-gray-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+                        <button @click="modalOpen = false" class="absolute top-4 right-4 text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-white">✕</button>
                         
-                        <form @submit.prevent="submitTask">
+                        <h3 class="font-halloween text-2xl text-orange-600 dark:text-orange-500" x-text="editingTask ? 'Taak bewerken' : 'Nieuwe taak'"></h3>
+                        
+                        <form @submit.prevent="submitTask" class="space-y-4 pt-2">
                             <input type="hidden" name="task_id" x-model="form.id">
                             
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Titel</label>
+                            <div>
+                                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Titel</label>
                                 <input
                                     type="text"
                                     name="title"
                                     x-model="form.title"
                                     required
-                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    class="w-full bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                                 >
                             </div>
                             
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Beschrijving</label>
+                            <div>
+                                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Beschrijving</label>
                                 <textarea
                                     name="description"
                                     x-model="form.description"
                                     rows="3"
-                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    class="w-full bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-800 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                                 ></textarea>
                             </div>
                             
-                            <div class="flex justify-end gap-3">
-                                <button type="button" @click="modalOpen = false; resetForm()" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">Annuleren</button>
-                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors" x-text="editingTask ? 'Bijwerken' : 'Aanmaken'"></button>
+                            <div class="flex justify-end gap-3 pt-2">
+                                <button type="button" @click="modalOpen = false; resetForm()" class="px-4 py-2 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-slate-800 rounded-lg text-sm transition-colors">Annuleren</button>
+                                <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 px-5 rounded-lg text-sm transition-colors" x-text="editingTask ? 'Bijwerken' : 'Aanmaken'"></button>
                             </div>
                         </form>
                     </div>
                 </div>
-            </div>
 
-            {{-- Tasks List --}}
-            <div id="tasks-list" class="space-y-3">
-                @foreach($tasks as $task)
-                <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <div class="flex items-center gap-4">
-                        <input
-                            type="checkbox"
-                            @click="toggleTask({{ $task->id }})"
-                            :checked="{{ $task->completed ? 'true' : 'false' }}"
-                            class="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500"
-                        >
-                        <div>
-                            <h3 class="font-medium text-gray-900 dark:text-white {{ $task->completed ? 'line-through text-gray-400' : '' }}">{{ $task->title }}</h3>
-                            @if($task->description)
-                            <p class="text-sm text-gray-500 dark:text-gray-400 {{ $task->completed ? 'line-through' : '' }}">{{ $task->description }}</p>
-                            @endif
+                {{-- Tasks List --}}
+                <div id="tasks-list" class="space-y-3">
+                    @foreach($tasks as $task)
+                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-[#090a18] rounded-xl border border-gray-200 dark:border-slate-800/50 transition-colors hover:border-gray-300 dark:hover:border-slate-700/50">
+                        <div class="flex items-center gap-4">
+                            <input
+                                type="checkbox"
+                                @click="toggleTask({{ $task->id }})"
+                                :checked="{{ $task->completed ? 'true' : 'false' }}"
+                                class="w-5 h-5 text-orange-500 border-gray-300 dark:border-slate-700 rounded focus:ring-orange-500 bg-white dark:bg-slate-900 appearance-none cursor-pointer"
+                            >
+                            <div>
+                                <h3 class="font-medium text-gray-900 dark:text-slate-100 {{ $task->completed ? 'line-through text-gray-400 dark:text-slate-500' : '' }}">{{ $task->title }}</h3>
+                                @if($task->description)
+                                <p class="text-xs text-gray-500 dark:text-slate-400 {{ $task->completed ? 'line-through' : '' }}">{{ $task->description }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button
+                                @click="editTask({{ $task->id }}, '{{ $task->title }}', '{{ $task->description ?? '' }}')"
+                                class="text-gray-400 dark:text-slate-500 hover:text-orange-500 dark:hover:text-orange-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800/50 transition-colors"
+                                title="Bewerken"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                            <button
+                                @click="deleteTask({{ $task->id }})"
+                                class="text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800/50 transition-colors"
+                                title="Verwijderen"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button
-                            @click="editTask({{ $task->id }}, '{{ $task->title }}', '{{ $task->description ?? '' }}')"
-                            class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-1"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                        </button>
-                        <button
-                            @click="deleteTask({{ $task->id }})"
-                            class="text-gray-500 hover:text-red-600 p-1"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
+                    @endforeach
+                    
+                    @if($tasks->isEmpty())
+                    <div class="text-center py-12">
+                        <div class="text-4xl mb-3">📝</div>
+                        <p class="text-gray-400 dark:text-slate-400 text-lg">Nog geen taken.</p>
+                        <p class="text-gray-500 dark:text-slate-500 text-sm mt-1">Klik op 'Nieuwe taak' om te beginnen.</p>
                     </div>
+                    @endif
                 </div>
-                @endforeach
-                
-                @if($tasks->isEmpty())
-                <p class="text-center text-gray-500 dark:text-gray-400 py-8">Nog geen taken. Klik op 'Nieuwe taak' om te beginnen.</p>
-                @endif
             </div>
         </section>
-    </div>
+
+        {{-- Footer Tip --}}
+        <div class="max-w-7xl mx-auto px-6 pb-8">
+            <p class="text-xs text-gray-400 dark:text-slate-400 italic leading-relaxed text-center">
+                Tip: Neem een zaklamp of hoofdlampje mee en kom verkleed! Zo maak je de beleving compleet. 🎃
+            </p>
+        </div>
+    </main>
+
+    {{-- Alpine.js for modal --}}
+    @push('scripts')
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @endpush
 
     <script>
         function taskApp() {
@@ -281,29 +305,5 @@
                 }
             }
         }
-        
-        function themeApp() {
-            return {
-                isDark: false,
-                
-                init() {
-                    const savedTheme = localStorage.getItem('theme');
-                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    this.isDark = savedTheme ? savedTheme === 'dark' : prefersDark;
-                    this.applyTheme();
-                },
-                
-                toggleTheme() {
-                    this.isDark = !this.isDark;
-                    localStorage.setItem('theme', this.isDark ? 'dark' : 'light');
-                    this.applyTheme();
-                },
-                
-                applyTheme() {
-                    document.documentElement.classList.toggle('dark', this.isDark);
-                }
-            }
-        }
     </script>
-</body>
-</html>
+</x-layouts.app>

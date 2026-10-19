@@ -8,7 +8,15 @@ Route::get('/', function (EventController $eventController) {
     $event = $eventController->getPublishedEvent();
     $tasks = \App\Models\Task::latest()->get();
     return view('welcome', compact('event', 'tasks'));
-});
+})->name('home');
+
+Route::get('/landing', function () {
+    return view('landing');
+})->name('landing');
+
+Route::get('/landing2', function () {
+    return view('landing2');
+})->name('landing2');
 
 // Task CRUD routes
 Route::get('/tasks', [TaskController::class, 'index']);
